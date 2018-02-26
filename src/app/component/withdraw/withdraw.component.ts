@@ -10,6 +10,8 @@ export class WithdrawComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-  }
 
+    
+
+  }
 }

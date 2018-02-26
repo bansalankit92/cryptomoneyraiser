@@ -10,6 +10,8 @@ import { DashboardComponent } from 'app/component/dashboard/dashboard.component'
 import { NewCampaignComponent } from 'app/component/new-campaign/new-campaign.component';
 import { DisplayComponent } from 'app/component/display/display.component';
 import { TeamComponent } from './component/team/team.component';
+import { AppRouting } from 'app/app.routing';
+import { UtilService } from 'app/service/util.service';
 
 @NgModule({
   declarations: [
@@ -23,9 +25,10 @@ import { TeamComponent } from './component/team/team.component';
   ],
   imports: [
     BrowserModule,
-    FormsModule
+    FormsModule,
+    AppRouting
   ],
-  providers: [FundraiserService],
+  providers: [FundraiserService, FundraiserService, UtilService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

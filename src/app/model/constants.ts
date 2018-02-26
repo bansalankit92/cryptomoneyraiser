@@ -7,6 +7,7 @@ export class Constants {
   public static GAS_NEW_CAMPAIGN = 245000;
   public static GAS_WITHDRAW = 120000;
   public static GAS_CONTRIBUTE = 184882;
+  public static UNLOCK_TIME = 2000;
 }
 
 
