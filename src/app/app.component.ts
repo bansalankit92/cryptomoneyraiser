@@ -3,6 +3,7 @@ import { Campaign } from './model/Campaign';
 import { Constants } from './model/constants'
 //import * as Web3 from 'web3'
 import { default as Web3} from 'web3';
+import { FundraiserService } from 'app/service/fundraiser.service';
 
 @Component({
   selector: 'app-root',
@@ -32,8 +33,13 @@ export class AppComponent implements OnInit {
   accountAddress = '0x48A105d092dCD56735CA052EA3c82ebfaB367f9b';
   accountPassword = 'ether123#';
 
+
+  constructor(private fundraiserService: FundraiserService) {
+
+  }
+
   ngOnInit() {
-    console.log(window['web3']);
+   /* console.log(window['web3']);
     console.log(Web3);
 
     if (typeof window['web3'] !== 'undefined' && typeof window['Web3'] !== 'undefined') {
@@ -76,36 +82,50 @@ export class AppComponent implements OnInit {
         this.campaigns = res;
       });
 
-    }
+    }*/
+
+    this.fundraiserService.numOfCampaign().subscribe(res => {
+      console.log(res);
+      this.noOfCampaigns = res;
+    }, err => this.OnError(err));
+  }
+
+  OnError(err){
+    console.log(err);
   }
 
   getCampaigns() {
-    this.web3Instance.campaigns(1, (err, res) => {
+   /* this.web3Instance.campaigns(1, (err, res) => {
       console.log(err, res);
       this.campaigns = res;
     });
     this.web3Instance.numCampaigns((err, res) => {
       console.log(err, res);
       this.noOfCampaigns = res;
-    });
+    });*/
   }
 
   search() {
     console.log(this.campaignId);
-    if (this.isWeb3Available) {
-      this.web3Instance.campaigns(this.campaignId, (err, res) => {
-        console.log(err, res);
-        this.campaigns = res;
-      });
-    } else {
-      this.web3Instance.methods.campaigns(this.campaignId).call((err, res) => {
-        console.log(err, res);
-        this.campaigns = res;
-      });
-    }
+    // if (this.isWeb3Available) {
+    //   this.web3Instance.campaigns(this.campaignId, (err, res) => {
+    //     console.log(err, res);
+    //     this.campaigns = res;
+    //   });
+    // } else {
+    //   this.web3Instance.methods.campaigns(this.campaignId).call((err, res) => {
+    //     console.log(err, res);
+    //     this.campaigns = res;
+    //   });
+    // }
+
+    this.fundraiserService.search(this.campaignId).subscribe(res => {
+      console.log(res);
+      this.campaigns = res;
+    });
   }
   unLockAccount() {
-    //console.log(this.web3.eth.personal)
+    // console.log(this.web3.eth.personal)
     //  this.web3.eth.personal.unlock();
     /**@TODO
      * validate, 
@@ -128,7 +148,7 @@ export class AppComponent implements OnInit {
      * 
      */
 
-    if (this.isWeb3Available) {
+    /*if (this.isWeb3Available) {
       this.web3Instance.newCampaign(this.campaign.beneficiary, this.campaign.fundingGoal,
         this.campaign.durationInMin, this.campaign.detailsUrl, this.campaign.category, (err, res) => {
           console.log(err, res);
@@ -163,7 +183,10 @@ export class AppComponent implements OnInit {
           alert('invalid password')
         }
       }).catch(err => console.log(err))
-    }
+    }*/
+
+
+
   }
 
 
@@ -174,7 +197,7 @@ export class AppComponent implements OnInit {
      */
     if (this.isWeb3Available) {
       this.web3Instance.newCampaign(this.campaign.beneficiary, this.campaign.fundingGoal,
-        this.campaign.durationInMin, this.campaign.detailsUrl, this.campaign.category, (err, res) => {
+        this.campaign.deadline, this.campaign.detailsUrl, this.campaign.category, (err, res) => {
           console.log(err, res);
           this.campaigns = res;
         });
@@ -212,7 +235,7 @@ export class AppComponent implements OnInit {
      */
     if (this.isWeb3Available) {
       this.web3Instance.newCampaign(this.campaign.beneficiary, this.campaign.fundingGoal,
-        this.campaign.durationInMin, this.campaign.detailsUrl, this.campaign.category, (err, res) => {
+        this.campaign.deadline, this.campaign.detailsUrl, this.campaign.category, (err, res) => {
           console.log(err, res);
           this.campaigns = res;
         });
