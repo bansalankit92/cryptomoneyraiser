@@ -22,6 +22,11 @@ export class DisplayComponent implements OnInit {
     this.fundraiserService.numOfCampaign().subscribe(res=>{
       console.log(res);
       this.noOfCampaigns = res;
+      this. getCampaigns();
+
+
+
+
     },err=>{
       console.log('eerr no of camp',err);
     });
@@ -38,9 +43,28 @@ export class DisplayComponent implements OnInit {
      });*/
      this.fundraiserService.search(this.campaignId).subscribe(res=>{
       console.log(res);
-      this.campaign = res;
+      this.campaigns = [];
+      this.campaigns.push(res);
     }, err => {
-      console.log('err no of camp', err);
+      console.log('err in search', err);
+    });
+   }
+
+   getCampaigns() {
+    /* this.web3Instance.campaigns(1, (err, res) => {
+       console.log(err, res);
+       this.campaigns = res;
+     });
+     this.web3Instance.numCampaigns((err, res) => {
+       console.log(err, res);
+       this.noOfCampaigns = res;
+     });*/
+     this.fundraiserService.getMultiple(1,this.noOfCampaigns).subscribe(res=>{
+      console.log(res);
+      this.campaigns = [];
+      this.campaigns = res;
+    }, err => {
+      console.log('err in getting multiple', err);
     });
    }
 

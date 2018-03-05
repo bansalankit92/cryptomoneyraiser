@@ -15,17 +15,35 @@ export class FundraiserService {
   private contractAddr = Constants.CONTRACT_ADDRESS;
   private defaultNodeIP = Constants.DEFAULT_NODEIP;
   private nodeIP: string; // Current nodeIP
-  private nodeConnected: boolean = true; // If we've established a connection yet
+  private nodeConnected = true; // If we've established a connection yet
   private web3Instance: any; // Current instance of web3
   private unlockedAccount: string; // Current unlocked account
 
   private ABI = Constants.CONTRACT;
   campaign: Campaign = new Campaign();
+  campaigns: Campaign[] = [];
   isWeb3Available = false;
   web3;
+  private $accountAddress;
+  private $accountPassword;
 
   constructor(private utilService: UtilService) { }
 
+
+
+	public get accountAddress(): string {
+		return this.$accountAddress;
+	}
+
+	public set accountAddress(value: string) {
+		this.$accountAddress = value;
+  }
+  
+  public set accountPassword(value: string) {
+		this.$accountPassword = value;
+	}
+
+  
 
   private initializeWeb3() {
     if (typeof window['web3'] !== 'undefined' && typeof window['Web3'] !== 'undefined') {
@@ -78,11 +96,11 @@ export class FundraiserService {
     }
   }
 
-  private unlockAccount(accountAddress: string, accountPassword: string, unlockTime ?: number): Observable < any > {
+  private unlockAccount(unlockTime ?: number): Observable < any > {
     this.initialize();
     return new Observable < any > (observer => {
-      if (this.utilService.isValidAddress(accountAddress) && accountPassword) {
-        this.web3.eth.personal.unlockAccount(accountAddress.trim(), accountPassword.trim(),
+      if (UtilService.isValidAddress(this.$accountAddress) && this.$accountPassword) {
+        this.web3.eth.personal.unlockAccount(this.$accountAddress.trim(), this.$accountPassword.trim(),
           unlockTime > 100 ? unlockTime : Constants.UNLOCK_TIME, (err, res) => this.handleCallback(err, res, observer));
       } else {
         this.OnError('Please enter correct account address and password', observer);
@@ -90,27 +108,48 @@ export class FundraiserService {
     });
   }
 
-  addNewCampaign(accountAddress: string, accountPassword: string, campaign: Campaign): Observable < any > {
+  addNewCampaign(campaign: Campaign): Observable < any > {
     /**
      * 
      * @get transaction receipt
      */
+    console.log('add new ', campaign);
     this.initialize();
     return new Observable < any > ((observer) => {
       if (this.isWeb3Available) {
-        this.web3Instance.newCampaign(this.campaign.beneficiary, this.campaign.fundingGoal,
-          this.campaign.deadline, this.campaign.detailsUrl, this.campaign.category,
+        this.web3Instance.newCampaign(campaign.beneficiary, campaign.fundingGoal,
+          campaign.deadline, campaign.detailsUrl, campaign.category,
           (err, res) => this.handleCallback(err, res, observer));
       } else {
-        this.unlockAccount(accountAddress, accountPassword).subscribe(res => {
+        this.unlockAccount().subscribe(res => {
           console.log(res);
           if (res) {
-          this.web3Instance.methods.newCampaign(this.campaign.beneficiary, this.campaign.fundingGoal,
-              this.campaign.deadline, this.campaign.detailsUrl, this.campaign.category).send({
-              from: accountAddress,
-              gas: Constants.GAS_NEW_CAMPAIGN
-            }, (err, res1) => this.handleCallback(err, res1, observer));
-
+          // this.web3Instance.methods.newCampaign(this.campaign.beneficiary, this.campaign.fundingGoal,
+          //     this.campaign.deadline, this.campaign.detailsUrl, this.campaign.category).send({
+          //     from: this.$accountAddress,
+          //     gas: Constants.GAS_NEW_CAMPAIGN
+          //   }, (err, res1) => this.handleCallback(err, res1, observer));
+          this.web3Instance.methods.newCampaign(campaign.beneficiary, campaign.fundingGoal,
+                campaign.deadline, campaign.detailsUrl, campaign.category).send({
+                from: '0x48A105d092dCD56735CA052EA3c82ebfaB367f9b',
+                gas: Constants.GAS_NEW_CAMPAIGN
+              })
+          .on('transactionHash', function (hash) {
+            console.log("hash ", hash);
+          observer.next(hash);
+          observer.complete();
+          })
+          .on('receipt', function (receipt) {
+            console.log("receipt ", receipt);
+           // observer.next(receipt);
+          })
+          .on('confirmation', function (confirmationNumber, receipt) {
+            console.log("confirmation no ", confirmationNumber);
+            console.log("receipt ", receipt);
+          })
+          .on('error', function(error){
+            observer.error(error);
+          });
           } else {
             this.OnError('Please enter correct account address and password', observer)
           }
@@ -120,9 +159,9 @@ export class FundraiserService {
   }
 
   private OnError(err, observer?: Subscriber < any >) {
-    if(observer){
+    if (observer) {
       observer.error(err);
-    }else{
+    }else {
     return Observable.throw(err);
     }
   }
@@ -134,9 +173,46 @@ export class FundraiserService {
       if (this.isWeb3Available) {
         this.web3Instance.campaigns(campaignId, (err, res) => this.handleCallback(err, res, observer));
       } else {
-        this.web3Instance.methods.campaigns(campaignId).call((err, res) => this.handleCallback(err, res, observer))
+        this.web3Instance.methods.campaigns(campaignId).call((err, res) => {
+          if (err) {
+            this.handleCallback(err, undefined, observer)
+          } else {
+            observer.next(Campaign.toCampaign(res, this.isWeb3Available));
+            observer.complete();
+          }
+        })
       }
     });
+  }
+
+  getMultiple(from:number, to:number): Observable < any > {
+    if(from > to){
+      return Observable.throw('From should be less than to');
+    }
+    this.initialize();
+    let o = new Observable < any > ((observer) => {
+      this.campaigns = [];
+      for (let i = from; i <= to; i++) {
+        if (this.isWeb3Available) {
+          this.web3Instance.campaigns(i, (err, res) => this.handleCallback(err, res, observer));
+        } else {
+          this.web3Instance.methods.campaigns(i).call((err, res) => {
+            if (err) {
+              this.handleCallback(err, undefined, observer)
+            } else {
+              res.id = i;
+              this.campaigns.push(Campaign.toCampaign(res, this.isWeb3Available))
+             // observer.next(this.campaigns);
+              if (this.campaigns.length >= to - from) {
+                observer.next(this.campaigns);
+                observer.complete();
+              }
+            }
+          })
+        }
+    }
+    });
+    return o;
   }
 
   numOfCampaign(): Observable < any > {
@@ -145,18 +221,13 @@ export class FundraiserService {
       if (this.isWeb3Available) {
         this.web3Instance.numCampaigns((err, res) => this.handleCallback(err, res, observer));
       } else {
-        this.web3Instance.methods.numCampaigns().call((err, res) => {
-            if (err) {
-              this.handleCallback(err, res, observer)
-            } else {
-              Campaign
-            }
-          })
+        this.web3Instance.methods.numCampaigns().call((err, res) => this.handleCallback(err, res, observer))
       }
     });
   }
 
   private handleCallback(err, res, observer: Subscriber < any > ) {
+    console.log('err: ',err,' res ', res)
     if (observer) {
       if (err) {
         observer.error(err)
@@ -170,7 +241,7 @@ export class FundraiserService {
   }
 
 
-  withdraw(accountAddress: string, accountPassword: string, campaignId: number): Observable < any > {
+  withdraw( campaignId: number): Observable < any > {
     /**
      * 
      * @get transaction receipt
@@ -181,11 +252,11 @@ export class FundraiserService {
         this.web3Instance.safeWithdrawal(campaignId,
           (err, res) => this.handleCallback(err, res, observer));
       } else {
-        this.unlockAccount(accountAddress, accountPassword).subscribe(res => {
+        this.unlockAccount().subscribe(res => {
           console.log(res);
           if (res) {
             this.web3Instance.methods.safeWithdrawal(campaignId).send({
-                from: accountAddress,
+                from: this.$accountAddress,
                 gas: Constants.GAS_WITHDRAW
               }, (err, res1) => this.handleCallback(err, res1, observer));
 
@@ -197,7 +268,7 @@ export class FundraiserService {
     });
   }
 
-  contribute(accountAddress: string, accountPassword: string, campaignId: number): Observable < any > {
+  contribute( campaignId: number, ether: number): Observable < any > {
     /**
      * 
      * @get transaction receipt
@@ -208,12 +279,14 @@ export class FundraiserService {
         this.web3Instance.contribute(campaignId,
           (err, res) => this.handleCallback(err, res, observer));
       } else {
-        this.unlockAccount(accountAddress, accountPassword).subscribe(res => {
+        this.unlockAccount().subscribe(res => {
           console.log(res);
           if (res) {
+            console.log(this.web3Instance.methods);
             this.web3Instance.methods.contribute(campaignId).send({
-                from: accountAddress,
-                gas: Constants.GAS_WITHDRAW
+                from: this.$accountAddress,
+                gas: Constants.GAS_WITHDRAW,
+                value: ether
               }, (err, res1) => this.handleCallback(err, res1, observer));
 
           } else {

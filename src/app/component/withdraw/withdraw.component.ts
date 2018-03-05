@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FundraiserService } from 'app/service/fundraiser.service';
 
 @Component({
   selector: 'app-withdraw',
@@ -7,11 +8,23 @@ import { Component, OnInit } from '@angular/core';
 })
 export class WithdrawComponent implements OnInit {
 
-  constructor() { }
+  campaignId: number;
 
+  constructor(private fundraiserService: FundraiserService) {
+
+  }
   ngOnInit() {
 
     
 
+  }
+
+  withdraw(){
+    this.fundraiserService.withdraw(this.campaignId).subscribe(res=>{
+      console.log('withdraw ',res);
+
+    },err => {
+      console.log('withdraw ',err);
+    });
   }
 }

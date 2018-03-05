@@ -12,6 +12,7 @@ import { DisplayComponent } from 'app/component/display/display.component';
 import { TeamComponent } from './component/team/team.component';
 import { AppRouting } from 'app/app.routing';
 import { UtilService } from 'app/service/util.service';
+import { SignInComponent } from './component/sign-in/sign-in.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { UtilService } from 'app/service/util.service';
     DisplayComponent,
     NewCampaignComponent,
     WithdrawComponent,
-    TeamComponent
+    TeamComponent,
+    SignInComponent
   ],
   imports: [
     BrowserModule,

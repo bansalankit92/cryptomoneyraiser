@@ -1,4 +1,4 @@
-{{noOfCampaigns}} {{campaigns | json}}
+{{noOfCampaigns}} {{campaign | json}}
 
   <div class="row">
     <div class="col-md-6">
@@ -8,14 +8,27 @@
       <button class="btn btn-info" (click)="search()">Search</button>
     </div>
   </div>
-
-  <div class="card" style="width: 18rem;">
-    <img class="card-img-top" src="http://lorempixel.com/400/200" alt="random pic">
-    <div class="card-body">
-      <h5 class="card-title">Card title</h5>
-      <p class="card-text">
-         
-      </p>
-      <a href="#" class="btn btn-primary">Invest</a>
+<div *ngIf="campaigns.length>0">
+  <div class="row">
+    <div class="col-sm-4"  *ngFor="let camp of campaigns">
+      <div class="card" style="width: 18rem;">
+        <img class="card-img-top" src="http://lorempixel.com/400/200" alt="random pic">
+        <div class="card-body">
+          <h5 class="card-title"></h5>
+          <p class="card-text">
+            id: {{camp.id}}
+           <br> Beneficiary: {{ camp.beneficiary}}
+          <br/>  fundingGoal: {{ camp.fundingGoal}}
+          <br/>  deadline: {{ camp.deadline*1000 | date: 'medium'}}
+          <br/>  detailsUrl:  <a [href]="camp.detailsUrl"> {{ camp.detailsUrl }}</a>
+          <br/>  category: {{ camp.category }}
+          <br/>  numFunders: {{ camp.numFunders }}
+          <br/> amountRaised: {{  camp.amountRaised }}
+          <br/>  isWithdrawn: {{  camp.isWithdrawn }}
+          </p>
+          <a href="#" class="btn btn-primary">Invest</a>
+        </div>
+      </div>
     </div>
   </div>
+</div>

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Campaign } from 'app/model/Campaign';
 import { FundraiserService } from 'app/service/fundraiser.service';
+import { Constants } from 'app/model/constants';
 
 @Component({
   selector: 'app-new-campaign',
@@ -10,8 +11,7 @@ import { FundraiserService } from 'app/service/fundraiser.service';
 export class NewCampaignComponent implements OnInit {
 
   campaign: Campaign = new Campaign();
-  accountAddress = '0x48A105d092dCD56735CA052EA3c82ebfaB367f9b';
-  accountPassword = 'ether123#';
+  
 
 
   constructor(private fundraiserService: FundraiserService) {
@@ -28,7 +28,7 @@ export class NewCampaignComponent implements OnInit {
      * 
      */
 
-     this.fundraiserService.addNewCampaign(this.accountAddress,this.accountPassword,this.campaign)
+     this.fundraiserService.addNewCampaign(this.campaign)
      .subscribe( res=>{
        console.log('new campaign res ',res)
      }, err=>{
