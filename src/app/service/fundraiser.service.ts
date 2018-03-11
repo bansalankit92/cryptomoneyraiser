@@ -51,10 +51,10 @@ export class FundraiserService {
       this.web3 = new this.Web3(window['web3'].currentProvider)
       this.isWeb3Available = true;
       this.web3Instance = this.web3.eth.contract(this.ABI).at(this.contractAddr);
-      // console.log(this.web3Instance)
-      // console.log(this.web3.eth)
-      // console.log(this.web3.eth.personal)
-      // console.log(this.web3.eth.getAccounts())
+       console.log(this.web3Instance)
+      // console.log(this.web3.eth.accounts[0])
+      // console.log(this.web3)
+      
 
       //  console.log(this.web3.eth.accounts)
       // this.getBalanceOf('0x9831b22d110D694c0a10651D82D856b453cEA00d');
@@ -96,8 +96,25 @@ export class FundraiserService {
     }
   }
 
-  private unlockAccount(unlockTime ?: number): Observable < any > {
+  public unlockAccount(unlockTime ?: number): Observable < any > {
     this.initialize();
+    if (this.isWeb3Available) {
+      return new Observable < any > (observer => {
+        window['web3'].eth.getAccounts((error, accounts) => {
+          if(error){
+            this.handleCallback(error, null, observer)
+          }
+          else{
+            if(accounts.length===0){
+              this.handleCallback('Please create account in metamask', null, observer);
+            }else{
+              observer.next(accounts[0]);
+              observer.complete();
+            }
+          }
+        });
+      });
+    }else{
     return new Observable < any > (observer => {
       if (UtilService.isValidAddress(this.$accountAddress) && this.$accountPassword) {
         this.web3.eth.personal.unlockAccount(this.$accountAddress.trim(), this.$accountPassword.trim(),
@@ -106,6 +123,7 @@ export class FundraiserService {
         this.OnError('Please enter correct account address and password', observer);
       }
     });
+  }
   }
 
   addNewCampaign(campaign: Campaign): Observable < any > {
@@ -117,9 +135,15 @@ export class FundraiserService {
     this.initialize();
     return new Observable < any > ((observer) => {
       if (this.isWeb3Available) {
+        this.unlockAccount().subscribe(account => {
+          console.log(account);
         this.web3Instance.newCampaign(campaign.beneficiary, campaign.fundingGoal,
-          campaign.deadline, campaign.detailsUrl, campaign.category,
+          campaign.deadline, campaign.detailsUrl, campaign.category,{
+            from: account,
+            gas: Constants.GAS_NEW_CAMPAIGN
+          },
           (err, res) => this.handleCallback(err, res, observer));
+        }, err => this.OnError(err, observer));
       } else {
         this.unlockAccount().subscribe(res => {
           console.log(res);
@@ -131,7 +155,7 @@ export class FundraiserService {
           //   }, (err, res1) => this.handleCallback(err, res1, observer));
           this.web3Instance.methods.newCampaign(campaign.beneficiary, campaign.fundingGoal,
                 campaign.deadline, campaign.detailsUrl, campaign.category).send({
-                from: '0x48A105d092dCD56735CA052EA3c82ebfaB367f9b',
+                from: this.$accountAddress,
                 gas: Constants.GAS_NEW_CAMPAIGN
               })
           .on('transactionHash', function (hash) {
@@ -171,7 +195,14 @@ export class FundraiserService {
     this.initialize();
     return new Observable < any > ((observer) => {
       if (this.isWeb3Available) {
-        this.web3Instance.campaigns(campaignId, (err, res) => this.handleCallback(err, res, observer));
+        this.web3Instance.campaigns(campaignId, (err, res) => {
+          if(err)
+            this.handleCallback(err, res, observer);
+          else{
+            observer.next(Campaign.toCampaign(res, this.isWeb3Available));
+            observer.complete();
+          }
+        });
       } else {
         this.web3Instance.methods.campaigns(campaignId).call((err, res) => {
           if (err) {
@@ -194,14 +225,26 @@ export class FundraiserService {
       this.campaigns = [];
       for (let i = from; i <= to; i++) {
         if (this.isWeb3Available) {
-          this.web3Instance.campaigns(i, (err, res) => this.handleCallback(err, res, observer));
+          this.web3Instance.campaigns(i, (err, res) => {
+            if (err) {
+              this.handleCallback(err, undefined, observer)
+            } else {
+              res.id = i;
+              this.campaigns.push(Campaign.toCampaign(res, this.isWeb3Available, i))
+             // observer.next(this.campaigns);
+              if (this.campaigns.length >= to - from) {
+                observer.next(this.campaigns);
+                observer.complete();
+              }
+            }
+          });
         } else {
           this.web3Instance.methods.campaigns(i).call((err, res) => {
             if (err) {
               this.handleCallback(err, undefined, observer)
             } else {
               res.id = i;
-              this.campaigns.push(Campaign.toCampaign(res, this.isWeb3Available))
+              this.campaigns.push(Campaign.toCampaign(res, this.isWeb3Available, i))
              // observer.next(this.campaigns);
               if (this.campaigns.length >= to - from) {
                 observer.next(this.campaigns);
@@ -219,7 +262,14 @@ export class FundraiserService {
     this.initialize();
     return new Observable < any > ((observer) => {
       if (this.isWeb3Available) {
-        this.web3Instance.numCampaigns((err, res) => this.handleCallback(err, res, observer));
+        this.web3Instance.numCampaigns((err, res) => {
+          if(err)
+            this.handleCallback(err, res, observer);
+          else{
+            observer.next(res.toNumber());
+            observer.complete();
+          }
+        });
       } else {
         this.web3Instance.methods.numCampaigns().call((err, res) => this.handleCallback(err, res, observer))
       }
@@ -249,8 +299,14 @@ export class FundraiserService {
     this.initialize();
     return new Observable < any > ((observer) => {
       if (this.isWeb3Available) {
-        this.web3Instance.safeWithdrawal(campaignId,
-          (err, res) => this.handleCallback(err, res, observer));
+        this.unlockAccount().subscribe(account => {
+          console.log(account);
+          this.web3Instance.safeWithdrawal(campaignId, {
+              from: account,
+              gas: Constants.GAS_CONTRIBUTE
+            },
+            (err, res) => this.handleCallback(err, res, observer));
+          }, err => this.OnError(err, observer));
       } else {
         this.unlockAccount().subscribe(res => {
           console.log(res);
@@ -276,8 +332,16 @@ export class FundraiserService {
     this.initialize();
     return new Observable < any > ((observer) => {
       if (this.isWeb3Available) {
-        this.web3Instance.contribute(campaignId,
-          (err, res) => this.handleCallback(err, res, observer));
+
+        this.unlockAccount().subscribe(account => {
+          console.log(account);
+          this.web3Instance.contribute(campaignId, {
+              from: account,
+              gas: Constants.GAS_CONTRIBUTE,
+              value: ether*1000000000000000000 + Constants.GAS_WITHDRAW
+            },
+            (err, res) => this.handleCallback(err, res, observer));
+          }, err => this.OnError(err, observer));
       } else {
         this.unlockAccount().subscribe(res => {
           console.log(res);
@@ -286,7 +350,7 @@ export class FundraiserService {
             this.web3Instance.methods.contribute(campaignId).send({
                 from: this.$accountAddress,
                 gas: Constants.GAS_WITHDRAW,
-                value: ether
+                value: ether + Constants.GAS_WITHDRAW
               }, (err, res1) => this.handleCallback(err, res1, observer));
 
           } else {

@@ -25,6 +25,12 @@ export class SignInComponent implements OnInit {
     if (UtilService.isValidAddress(this.accountAddress) && this.accountPassword) {
       this.fundraiserService.accountAddress = this.accountAddress;
       this.fundraiserService.accountPassword = this.accountPassword;
+      this.fundraiserService.unlockAccount().subscribe(res=>{
+        console.log(res)
+
+       },err=>{
+         console.log(err)
+       });
     }else{
       alert('Please add account address and password!');
     }

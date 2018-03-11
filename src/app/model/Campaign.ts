@@ -10,12 +10,24 @@ export class Campaign {
   amountRaised: number;
   isWithdrawn: boolean;
 
-  public static toCampaign(res, isWeb3Available:boolean): Campaign{
+  public static toCampaign( res, isWeb3Available:boolean , id?): Campaign{
     let campaign = new Campaign();
     if(isWeb3Available){
-alert('@TODO   Plz check the reposnse and complete the mehtod');
+       // alert('@TODO   Plz check the reposnse and complete the mehtod');
+
+        campaign.id = id;
+        campaign.beneficiary = res[0];
+        campaign.fundingGoal = res[1].toNumber();
+        campaign.deadline = res[2].toNumber();
+        campaign.detailsUrl = res[3];
+        campaign.category = res[4];
+        campaign.numFunders = res[5].toNumber();
+        campaign.amountRaised = res[6].toNumber();
+        campaign.isWithdrawn = res[7];
+
+
     }else{
-      campaign.id = res.id;
+        campaign.id = id;
         campaign.beneficiary = res.beneficiary;
         campaign.fundingGoal = res.fundingGoal;
         campaign.deadline = res.deadline;

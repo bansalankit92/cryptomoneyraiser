@@ -1,4 +1,4 @@
-export const CONTARCT_BYTE_CODE = [{
+/*export const CONTARCT_BYTE_CODE = [{
     "constant": true,
     "inputs": [{
       "name": "",
@@ -168,3 +168,255 @@ export const CONTARCT_BYTE_CODE = [{
     "name": "GoalReached",
     "type": "event"
   }];
+*/
+
+export const CONTARCT_BYTE_CODE = [{
+  "constant": true,
+  "inputs": [{
+    "name": "",
+    "type": "uint256"
+  }],
+  "name": "campaigns",
+  "outputs": [{
+    "name": "beneficiary",
+    "type": "address"
+  }, {
+    "name": "fundingGoal",
+    "type": "uint256"
+  }, {
+    "name": "deadline",
+    "type": "uint256"
+  }, {
+    "name": "detailsUrl",
+    "type": "string"
+  }, {
+    "name": "category",
+    "type": "string"
+  }, {
+    "name": "numFunders",
+    "type": "uint256"
+  }, {
+    "name": "amountRaised",
+    "type": "uint256"
+  }, {
+    "name": "isWithdrawn",
+    "type": "bool"
+  }],
+  "payable": false,
+  "stateMutability": "view",
+  "type": "function"
+}, {
+  "constant": true,
+  "inputs": [],
+  "name": "numCampaigns",
+  "outputs": [{
+    "name": "",
+    "type": "uint256"
+  }],
+  "payable": false,
+  "stateMutability": "view",
+  "type": "function"
+}, {
+  "constant": false,
+  "inputs": [{
+    "name": "campaignID",
+    "type": "uint256"
+  }],
+  "name": "checkGoalReached",
+  "outputs": [{
+    "name": "reached",
+    "type": "bool"
+  }],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "function"
+}, {
+  "constant": false,
+  "inputs": [{
+    "name": "campaignID",
+    "type": "uint256"
+  }],
+  "name": "safeWithdrawal",
+  "outputs": [],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "function"
+}, {
+  "constant": true,
+  "inputs": [],
+  "name": "giveAwayCoin",
+  "outputs": [{
+    "name": "",
+    "type": "uint256"
+  }],
+  "payable": false,
+  "stateMutability": "view",
+  "type": "function"
+}, {
+  "constant": true,
+  "inputs": [],
+  "name": "tokenReward",
+  "outputs": [{
+    "name": "",
+    "type": "address"
+  }],
+  "payable": false,
+  "stateMutability": "view",
+  "type": "function"
+}, {
+  "constant": false,
+  "inputs": [{
+    "name": "totalCoins",
+    "type": "uint256"
+  }],
+  "name": "changeGiveAwayCoin",
+  "outputs": [],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "function"
+}, {
+  "constant": true,
+  "inputs": [],
+  "name": "owner",
+  "outputs": [{
+    "name": "",
+    "type": "address"
+  }],
+  "payable": false,
+  "stateMutability": "view",
+  "type": "function"
+}, {
+  "constant": false,
+  "inputs": [{
+    "name": "campaignID",
+    "type": "uint256"
+  }, {
+    "name": "durationInMinutes",
+    "type": "uint256"
+  }],
+  "name": "extendDeadLine",
+  "outputs": [],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "function"
+}, {
+  "constant": false,
+  "inputs": [{
+    "name": "campaignID",
+    "type": "uint256"
+  }],
+  "name": "contribute",
+  "outputs": [],
+  "payable": true,
+  "stateMutability": "payable",
+  "type": "function"
+}, {
+  "constant": false,
+  "inputs": [{
+    "name": "beneficiary",
+    "type": "address"
+  }, {
+    "name": "goal",
+    "type": "uint256"
+  }, {
+    "name": "durationInMinutes",
+    "type": "uint256"
+  }, {
+    "name": "detailsUrl",
+    "type": "string"
+  }, {
+    "name": "category",
+    "type": "string"
+  }],
+  "name": "newCampaign",
+  "outputs": [{
+    "name": "campaignID",
+    "type": "uint256"
+  }],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "function"
+}, {
+  "constant": false,
+  "inputs": [{
+    "name": "addressOfTokenUsedAsReward",
+    "type": "address"
+  }],
+  "name": "changeGiveAwayTokenAddress",
+  "outputs": [],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "function"
+}, {
+  "constant": false,
+  "inputs": [{
+    "name": "newOwner",
+    "type": "address"
+  }],
+  "name": "transferOwnership",
+  "outputs": [],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "function"
+}, {
+  "inputs": [{
+    "name": "giveAwayCoins",
+    "type": "uint256",
+    "index": 0,
+    "typeShort": "uint",
+    "bits": "256",
+    "displayName": "give Away Coins",
+    "template": "elements_input_uint",
+    "value": "100"
+  }, {
+    "name": "addressOfTokenUsedAsReward",
+    "type": "address",
+    "index": 1,
+    "typeShort": "address",
+    "bits": "",
+    "displayName": "address Of Token Used As Reward",
+    "template": "elements_input_address",
+    "value": "0xb331Cc27D592053972a0ee4106A558131BB7B663"
+  }],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "constructor"
+}, {
+  "anonymous": false,
+  "inputs": [{
+    "indexed": false,
+    "name": "campaignID",
+    "type": "uint256"
+  }, {
+    "indexed": false,
+    "name": "backer",
+    "type": "address"
+  }, {
+    "indexed": false,
+    "name": "amount",
+    "type": "uint256"
+  }, {
+    "indexed": false,
+    "name": "isContribution",
+    "type": "bool"
+  }],
+  "name": "FundTransfer",
+  "type": "event"
+}, {
+  "anonymous": false,
+  "inputs": [{
+    "indexed": false,
+    "name": "campaignID",
+    "type": "uint256"
+  }, {
+    "indexed": false,
+    "name": "recipient",
+    "type": "address"
+  }, {
+    "indexed": false,
+    "name": "totalAmountRaised",
+    "type": "uint256"
+  }],
+  "name": "GoalReached",
+  "type": "event"
+}];
