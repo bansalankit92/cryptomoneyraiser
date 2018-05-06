@@ -1,0 +1,13 @@
+.panel {
+    font-size: 1.3em;
+    position: absolute;
+    z-index: 10;
+   color: white;
+    top: 50%;
+    left: 40%;
+    margin: -110px 0 0 -100px;
+    padding: 20px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    z-index: 100;
+}

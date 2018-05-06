@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Constants } from 'app/model/constants';
-import { default as Web3} from 'web3';
+ import { default as Web3} from 'web3';
 import { Campaign } from 'app/model/Campaign';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/fromPromise';
@@ -338,7 +338,7 @@ export class FundraiserService {
           this.web3Instance.contribute(campaignId, {
               from: account,
               gas: Constants.GAS_CONTRIBUTE,
-              value: ether*1000000000000000000 + Constants.GAS_WITHDRAW
+              value: ether * 1000000000000000000 + Constants.GAS_WITHDRAW
             },
             (err, res) => this.handleCallback(err, res, observer));
           }, err => this.OnError(err, observer));
